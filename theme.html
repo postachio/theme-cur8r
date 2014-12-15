@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html prefix="og: http://ogp.me/ns#" xmlns:og="http://ogp.me/ns#">
+  <head>
+    <meta charset="utf-8">
+    <title>
+      {% if is_login %}Login
+      {% elif is_home %}{{ site.author }}
+      {% elif is_tag %}{{ tag }}
+      {% elif post %}{{ post.title }}
+      {% endif %}
+      | {{ site.name }}
+    </title>
+
+    {{ header_meta }}
+
+    <link href="{{ assets('css/style.css') }}" rel="stylesheet" />
+
+    <!--[if IE 7]>
+      <link href="http://postach.io/static/themes/_assets/fontawesome/css/font-awesome-ie7.min.css" rel="stylesheet">
+    <![endif]-->
+
+    <!--
+    <style>
+      /**
+       * Your custom override CSS goes here. If you wanted to override the default link colour and hover state, you would do this:
+       *
+       *  a {
+       *      color: #333; /* Override the default colour with a not-quite-black that is easy on the eyes on white screens */
+       *  }
+       *
+       *  a:hover {
+       *      color: #545454; /* This will now change the hover state as well */
+       *  }
+       *
+       *  You can put anything you want to override in here, so be creative!
+       */
+    </style>
+    -->
+
+    {% if site.analytics %}
+    <script>
+
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', '{{ site.analytics }}']);
+      _gaq.push(['_trackPageview']);
+
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+
+    </script>
+    {% endif %}
+</head>
+<body>
+
+  {% if is_login %}
+
+    {{ login_form }}
+
+  {% else %}
+    <h1>cur8r</h1>
+
+    <div class="wrapper">
+
+    {% if is_home or is_tag %}
+
+      {% if posts %}
+
+      <div class="post-wrapper">
+
+        {% if is_tag %}
+        <h4 class="tag-header">Showing all posts tagged as {{ tag }}:</h4>
+        {% endif %}
+
+        {% for post in posts %}
+        <div class="post-fragment">
+          {% if post.photos %}
+          {% for photo in post.photos %}
+          {% if loop.index == 1 %}
+          <div class="post-image">
+            {% if post.type == 'link' %}
+            <a href="{{ post.url }}" target="_blank">
+            {% else %}
+            <a href="{{ post.permalink }}">
+            {% endif %}
+              {% if photo %}
+              <img src="{{ photo.width_600 }}" />
+              {% else %}
+              <img src="http://placehold.it/400x300/0eafff/ffffff.png" alt="" />
+              {% endif %}
+            </a>
+          </div>
+          {% endif %}
+          {% endfor %}
+          {% endif %}
+
+          {% if post.type == 'link' %}
+          <div class="post-details">
+            <h2><a href="{{ post.url }}" target="_blank">{{ post.title|truncate(40, False, '...') }}</a></h2>
+          </div>
+          {% else %}
+          <div class="post-details">
+            <h2><a href="{{ post.permalink }}">{{ post.title|truncate(40, False, '...') }}</a></h2>
+          </div>
+          {% endif %}
+
+          <ul class="tags">
+          {% if post.tags %}
+            {% for tag in post.tags %}
+            {% if loop.index <= 3 %}
+            <li><a href="/tag/{{ tag }}" class="tag">{{ tag }}</a></li>
+            {% endif %}
+            {% endfor %}
+          {% endif %}
+          </ul>
+
+          <!--
+          <div class="post-body">
+            {% if post.content|striptags|wordcount > 0 %}
+              <p>{{ post.content|striptags|truncate(300) }}</p>
+            {% endif %}
+          </div>
+          -->
+        </div>
+        {% endfor %}
+
+      </div><!-- end post wrapper -->
+      {% endif %}
+
+      {% if not is_tag and posts|length >= 9 %}
+      <div class="pagination">
+        {% if pagination.prev %}<a href="{{ pagination.prev }}" class="post-prev">&laquo; Prev</a>{% endif %}
+        {% if pagination.next %}<a href="{{ pagination.next }}" class="post-next">Next &raquo;</a>{% endif %}
+      </div>
+      {% endif %}
+
+      {% elif post %}
+
+      <div class="post-wrapper">
+
+        <div class="post">
+
+          <h2>{{ post.title }}</h2>
+
+          <div class="post-body">
+            <div class="post-content" data-type-cleanup="true">
+              {{ post.content }}
+            </div>
+
+            {% if post.type == 'link' or post.type == 'webclip' %}
+            <p><a href="{{ post.url }}"><span class="typcn typcn-link"></span> {{ post.url }}</a></p>
+            {% endif %}
+          </div>
+
+          {% if post.tags %}
+          <ul class="tags">
+            {% for tag in post.tags %}
+            <li><a href="/tag/{{ tag }}">{{ tag }}</a></li>
+            {% endfor %}
+          </ul>
+          {% endif %}
+
+          <div class="post-info">
+            <div class="info-left">
+              {{ theme.social.bar }}
+            </div>
+            <div class="info-right">
+              <p class="date"><span class="typcn typcn-calender"></span> {{ post.created_at|format_date }}</p>
+            </div>
+          </div>
+
+          {% if site.disqus %}
+          <div class="post-comments">
+            <div id="disqus_thread"></div>
+            <script type="text/javascript">
+              var disqus_shortname = '{{ site.disqus }}';
+              var disqus_url = '{{site.base_url}}{{ post.permalink }}';
+              (function() {
+                var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+                dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+                (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+              })();
+            </script>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="pagination">
+        <a href="/" class="post-prev">&laquo; Back Home</a>
+      </div>
+
+      {% elif post.type == 'page' %}
+
+      <div class="post-wrapper">
+        <div class="post">
+          <h2><a href="{{ page.permalink }}">{{ page.title }}</a></h2>
+          <div class="post-body">
+            <div class="post-content" data-type-cleanup="true">
+              {{ page.content }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {% endif %}
+
+      <div class="right">
+        <h2><img src="{{ site.avatar }}" class="avatar" /></h2>
+        <h3>{{ site.name }}</h3>
+        <p class="bio">{{ site.bio }}</p>
+      </div>
+
+      <div class="header">
+        <h1 class="logo"><a href="/">{{ site.name }}</a></h1>
+        <ul class="nav">
+        {% if pages %}
+          {% for page in pages %}
+          <li><a href="{{ page.permalink }}" class="{{ set_active(page.permalink) }}">{{ page.title }}</a></li>
+          {% endfor %}
+        {% endif %}
+        </ul>
+        <ul class="social">
+          {% if site.twitter %}
+          <li><a href="{{ site.twitter }}" target="_blank"><span class="typcn typcn-social-twitter"></span></a></li>
+          {% endif %}
+          {% if site.facebook %}
+          <li><a href="{{ site.facebook }}"><span class="typcn typcn-social-facebook"></span></a></li>
+          {% endif %}
+          {% if site.linkedin %}
+          <li><a href="{{ site.linkedin }}"><span class="typcn typcn-social-linkedin"></span></a></li>
+          {% endif %}
+          <li><a href="{{ site.atom_url }}"><span class="typcn typcn-rss"></span></a></li>
+        </ul>
+      </div>
+
+      <div class="mobile-nav">
+        <a href="#" class="toggle"><span class="typcn typcn-th-menu"></span></a>
+        <ul>
+          {% if pages %}
+            {% for page in pages %}
+            <li><a href="{{ page.permalink }}" class="{{ set_active(page.permalink) }}">{{ page.title }}</a></li>
+            {% endfor %}
+          {% endif %}
+          {% if site.twitter %}
+          <li><a href="{{ site.twitter }}" target="_blank"><span class="typcn typcn-social-twitter"></span>&nbsp;&nbsp;Twitter</a></li>
+          {% endif %}
+          {% if site.facebook %}
+          <li><a href="{{ site.facebook }}"><span class="typcn typcn-social-facebook"></span>&nbsp;&nbsp;Facebook</a></li>
+          {% endif %}
+          {% if site.linkedin %}
+          <li><a href="{{ site.linkedin }}"><span class="typcn typcn-social-linkedin"></span>&nbsp;&nbsp;LinkedIn</a></li>
+          {% endif %}
+          <li><a href="{{ site.atom_url }}"><span class="typcn typcn-rss"></span>&nbsp;&nbsp;RSS</a></li>
+        </ul>
+      </div>
+
+    </div><!-- end wrapper -->
+
+    {% endif %}
+
+    {{ footer_meta }}
+
+    <script>
+      $('a.toggle').on('click', function() {
+        $('div.mobile-nav ul').toggle('fast', function() {});
+      });
+    </script>
+
+  </body>
+</html>
