@@ -537,6 +537,7 @@ div.post div.post-body .post-content h3 {
 }
 div.post div.post-body .post-content img {
   max-width: 100%;
+  height: auto;
 }
 div.post div.post-body .post-content .mejs-container {
   margin-top: 7.5px;
